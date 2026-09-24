@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Wedding Album — Vishnu & Anagha</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-obsidian: #050406;
+            --bg-card: rgba(18, 15, 24, 0.78);
+            --border-gold: rgba(221, 178, 107, 0.25);
+            --gold-light: #fbe6b5;
+            --gold-primary: #ddb26b;
+            --gold-gradient: linear-gradient(135deg, #fbe6b5 0%, #ddb26b 50%, #996f2a 100%);
+            --text-main: #f5f3ef;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-obsidian);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .gallery-page-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .back-nav {
+            margin-bottom: 30px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--gold-primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 600;
+            transition: opacity 0.3s;
+        }
+
+        .back-btn:hover { opacity: 0.8; }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-header span {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            color: var(--gold-primary);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .page-header h1 {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .full-album-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        @media screen and (min-width: 768px) {
+            .full-album-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        .album-item {
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--border-gold);
+            height: 240px;
+            cursor: pointer;
+            position: relative;
+            background: var(--bg-card);
+        }
+
+        .album-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease, filter 0.5s;
+        }
+
+        .album-item:hover img {
+            transform: scale(1.06);
+            filter: brightness(1.1);
+        }
+
+        /* Lightbox Fullscreen View */
+        .lightbox-overlay {
+            display: none;
+            position: fixed;
+            z-index: 500;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 2, 4, 0.96);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .lightbox-content {
+            max-width: 90vw;
+            max-height: 85vh;
+            border-radius: 12px;
+            border: 1px solid var(--border-gold);
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 30px;
+            right: 35px;
+            color: var(--gold-light);
+            font-size: 2.2rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="gallery-page-container">
+        
+        <div class="back-nav">
+            <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back to Invitation</a>
+        </div>
+
+        <div class="page-header">
+            <span>Visual Archive</span>
+            <h1>Complete Wedding Album</h1>
+        </div>
+
+        <!-- The JavaScript automatically injects all your photos into this grid -->
+        <div class="full-album-grid" id="fullAlbumGrid"></div>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div class="lightbox-overlay" id="lightboxOverlay" onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span>
+        <img class="lightbox-content" id="lightboxImg" src="" alt="Zoomed View">
+    </div>
+
+    <script>
+        // ==========================================
+        // FOLDER SETTINGS
+        // ==========================================
+        const folderName = "images/";  // Name of your local folder
+        const fileExtension = ".jpg";  // Change to ".png" if your pictures are PNG files
+        const totalPhotos = 25;        // Change this number to match how many photos are in your folder
+
+        function loadFolderAlbum() {
+            const albumGrid = document.getElementById('fullAlbumGrid');
+            albumGrid.innerHTML = ""; // Clear grid before loading
+
+            // Automatically generates card elements for every photo in the sequence
+            for (let i = 1; i <= totalPhotos; i++) {
+                const photoSrc = `${folderName}${i}${fileExtension}`;
+
+                const item = document.createElement('div');
+                item.className = 'album-item';
+                item.setAttribute('onclick', `openLightbox('${photoSrc}')`);
+                item.innerHTML = `<img src="${photoSrc}" alt="Wedding Photo ${i}" loading="lazy">`;
+                
+                albumGrid.appendChild(item);
+            }
+        }
+
+        // Run when the page loads
+        window.addEventListener('DOMContentLoaded', loadFolderAlbum);
+
+        // Lightbox Functions for Zooming Photos
+        function openLightbox(imgSrc) {
+            document.getElementById('lightboxImg').src = imgSrc;
+            document.getElementById('lightboxOverlay').style.display = 'flex';
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightboxOverlay').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
